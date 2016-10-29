@@ -11,7 +11,7 @@ class Input extends Component {
 class Examples extends Component {
   render() {
     return <div className="examples">
-      <div>Examples:</div>
+      <h4>Examples:</h4>
       {
         _.map(
               this.props.values,
