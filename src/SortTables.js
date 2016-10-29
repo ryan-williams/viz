@@ -5,13 +5,14 @@ import Arrows from './Arrows';
 class SortTables extends Component {
   render() {
     const { w, h, fontSize, rowStrs, sortedStrs, sortMappingDict, cellsWidth, sortArrowsWidth } = this.props;
+    const n = rowStrs.length;
     return <g>
       <SvgCells name="suffixes" {...{w, h, fontSize, rowStrs}} />
       <g transform={"translate(" + cellsWidth + ",0)"}>
         <Arrows {...{sortMappingDict, width: sortArrowsWidth, h}} />
       </g>
       <g transform={"translate(" + (cellsWidth + sortArrowsWidth) + ",0)"}>
-        <SvgCells name="sorted-suffixes" {...{w, h, fontSize, rowStrs: sortedStrs}} />
+        <SvgCells name="sorted-suffixes" {...{ w, h, fontSize, rowStrs: sortedStrs, highlightCol: n-1 }} />
       </g>
     </g>;
   }
@@ -19,7 +20,7 @@ class SortTables extends Component {
 
 class SvgCells extends Component {
   render() {
-    const { w, h, rowStrs, fontSize } = this.props;
+    const { w, h, rowStrs, fontSize, highlightCol } = this.props;
 
     const n = rowStrs.length;
 
@@ -27,6 +28,13 @@ class SvgCells extends Component {
     rowStrs.forEach((rowStr, r) => {
       let masking = false;
       rowStr.split('').forEach((ch, c) => {
+        let className =
+              (c === highlightCol) ?
+                    "highlighted" :
+                    (masking ?
+                          "masked" :
+                          ""
+                    );
         cells.push(
               <text
                     key={r+","+c}
@@ -34,9 +42,8 @@ class SvgCells extends Component {
                     y={h*(r+.5)}
                     textAnchor="middle"
                     dominantBaseline="middle"
-                    //fontFamily="monospace"
                     fontSize={fontSize}
-                    className={masking ? "masked" : ""}
+                    className={className}
               >
                 {ch}
               </text>

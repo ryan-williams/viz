@@ -5,6 +5,7 @@ import { sqrtInterp } from './interp';
 import { Input, Examples } from './Input';
 import LocalStorageMixin from 'react-localstorage';
 import SortTables from './SortTables';
+import CardinalCurve from './CardinalCurve';
 
 let App = React.createClass({
 
@@ -17,13 +18,15 @@ let App = React.createClass({
 
   getInitialState() {
     return {
-      value: "abzy",
+      //value: "abzy",
       maxWidth: 600,
       examples: {
         seashells: "she sells seashells by the sea shore",
         woodchuck: "how much wood would a woodchuck chuck if a woodchuck could chuck wood",
         banana: "banana",
         Mississippi: "Mississippi",
+        "DNA (50)": "ATTTTTAAGAGAAAAAACTGAAAGTTAATAGAGAGGTGACTCAGATCCAG",
+        "DNA (100)": "ATTTTTAAGAGAAAAAACTGAAAGTTAATAGAGAGGTGACTCAGATCCAGAGGTGGAAGAGGAAGGAAGCTTGGAACCCTATAGAGTTGCTGAGTGCCAGG",
       },
       arrowWidthFn: sqrtInterp(100, 100, 200, 150, 400, 200),
       cellDimFn: sqrtInterp(5, 20, 10, 15, 50, 10, -1)
@@ -43,7 +46,6 @@ let App = React.createClass({
 
     for (let r = 0; r < n; r++) {
       let rowStr = value.substr(r) + '$' + value.substr(0, r);
-      // let rowStr = value.substr(r);
       rowStrsDict[rowStr] = r;
       rowStrs.push(rowStr);
     }
@@ -63,7 +65,12 @@ let App = React.createClass({
     const cellsHeight = h * n;
     const sortArrowsWidth = this.state.arrowWidthFn(w * n);
 
+    const matricesTailHeight = 20;
+
     const svgBorder = 0;
+
+    const svgWidth = cellsWidth*2 + sortArrowsWidth + 2*svgBorder;
+    const svgHeight = cellsHeight + matricesTailHeight + 2*svgBorder;
 
     return (
       <div className="all">
@@ -76,9 +83,18 @@ let App = React.createClass({
               onClick={(name) => this.setState({ value: this.state.examples[name] })}
         />
         <div className="svg-container">
-          <svg className="svg" width={cellsWidth*2 + sortArrowsWidth + 2*svgBorder} height={cellsHeight + 2*svgBorder}>
+          <svg className="svg" width={svgWidth} height={svgHeight}>
             <g transform={"translate("+svgBorder+","+svgBorder+")"}>
               <SortTables {...{rowStrs, sortedStrs, w, h, fontSize, sortMappingDict, cellsWidth, sortArrowsWidth}} />
+              <CardinalCurve
+                    fromX={svgWidth - w/2}
+                    fromY={cellsHeight}
+                    toX={w/2}
+                    toY={cellsHeight + matricesTailHeight}
+                    weight="1"
+                    upDown={true}
+                    stroke="blue"
+                    fill="transparent" />
             </g>
           </svg>
         </div>

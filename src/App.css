@@ -20,6 +20,10 @@
   border: 2px solid black;
 }
 
+.highlighted {
+  font-weight: bold;
+}
+
 .masked {
   opacity: 0.5;
 }
