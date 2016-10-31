@@ -6,3 +6,10 @@ Simple interactive visualization of the Burrows-Wheeler Transform:
 The matrices+sort widget hides itself for strings >50 chars long; it starts to really lag at 10s of chars. Each letter is a separate `<text>` element in an `<svg>`; maybe with a `<canvas>` I could do better? ¯\_(ツ)_/¯
 
 The bottom two rows are the BWT, and a naively run-length-encoded (RLE) BWT. For all the examples here, the latter uses more characters than the former; in production use there would be some other transfrom applied to the RLE'd BWT, that would really reduce the space occupied, perhaps? And/or: larger data sizes, beyond what can be viz'd here, would exhibit better savings from RLE.
+
+To run locally:
+
+```
+git clone git@github.com:ryan-williams/bwt.git && cd bwt
+npm start
+```
