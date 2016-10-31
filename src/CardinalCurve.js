@@ -23,7 +23,6 @@ class CardinalCurve extends Component {
                   interp(toX, fromX, weight),
                   toY
                 ];
-    // console.log(fromX,fromY, c1x,c1y, c2x,c2y, toX,toY);
     return <path
           d={"M" + fromX + " " + fromY + " C " + c1x + " " + c1y + ", " + c2x + " " + c2y + ", " + toX + " " + toY}
           {...rest}

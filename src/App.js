@@ -6,6 +6,7 @@ import { Input, Examples } from './Input';
 import LocalStorageMixin from 'react-localstorage';
 import SortTables from './SortTables';
 import CardinalCurve from './CardinalCurve';
+import { bwt as BWT } from "burrows-wheeler-transform";
 
 let runLengthEncode = (s) => {
   let r = [];
@@ -50,42 +51,67 @@ let App = React.createClass({
   },
 
   render() {
-    const value = this.state.value || "";
+    const value = (this.state.value || "");
     const n = value.length + 1;
 
-    let rowStrs = [];
-    let rowStrsDict = {};
+    let sortedTables = null;
+    let bwt = "";
+    if (n <= 51) {
+      let rowStrs = [];
+      let rowStrsDict = {};
 
-    for (let r = 0; r < n; r++) {
-      let rowStr = value.substr(r) + '$' + value.substr(0, r);
-      rowStrsDict[rowStr] = r;
-      rowStrs.push(rowStr);
+      for (let r = 0; r < n; r++) {
+        let rowStr = value.substr(r) + '$' + value.substr(0, r);
+        rowStrsDict[rowStr] = r;
+        rowStrs.push(rowStr);
+      }
+
+      let sortMappingDict = {};
+      let sortedStrs = rowStrs.concat();
+      sortedStrs.sort();
+      sortedStrs.forEach((sortedStr, sortedIdx) => {
+        let origIdx = rowStrsDict[sortedStr];
+        sortMappingDict[origIdx] = sortedIdx;
+        bwt += sortedStr[n - 1];
+      });
+
+      const w = this.state.cellDimFn(n);
+      const h = w;
+      const fontSize = w;
+      const cellsWidth = w * n;
+      const cellsHeight = h * n;
+      const sortArrowsWidth = this.state.arrowWidthFn(w * n);
+
+      const matricesTailHeight = 20;
+
+      const svgBorder = 0;
+
+      const svgWidth = cellsWidth * 2 + sortArrowsWidth + 2 * svgBorder;
+      const svgHeight = cellsHeight + matricesTailHeight + 2 * svgBorder;
+
+      sortedTables =
+            <div className="svg-container">
+              <svg className="svg" width={svgWidth} height={svgHeight}>
+                <g transform={"translate("+svgBorder+","+svgBorder+")"}>
+                  <SortTables {...{rowStrs, sortedStrs, w, h, fontSize, sortMappingDict, cellsWidth, sortArrowsWidth}} />
+                  <CardinalCurve
+                        fromX={svgWidth - w/2}
+                        fromY={cellsHeight}
+                        toX={w/2}
+                        toY={cellsHeight + matricesTailHeight}
+                        weight="1"
+                        upDown={true}
+                        stroke="blue"
+                        fill="transparent"
+                  />
+                </g>
+              </svg>
+            </div>;
+    } else {
+      bwt = BWT(value, '$').data;
     }
 
-    let sortMappingDict = {};
-    let bwt = "";
-    let sortedStrs = rowStrs.concat();
-    sortedStrs.sort();
-    sortedStrs.forEach((sortedStr, sortedIdx) => {
-      let origIdx = rowStrsDict[sortedStr];
-      sortMappingDict[origIdx] = sortedIdx;
-      bwt += sortedStr[n - 1];
-    });
-
     const rlBWT = runLengthEncode(bwt);
-    const w = this.state.cellDimFn(n);
-    const h = w;
-    const fontSize = w;
-    const cellsWidth = w * n;
-    const cellsHeight = h * n;
-    const sortArrowsWidth = this.state.arrowWidthFn(w * n);
-
-    const matricesTailHeight = 20;
-
-    const svgBorder = 0;
-
-    const svgWidth = cellsWidth*2 + sortArrowsWidth + 2*svgBorder;
-    const svgHeight = cellsHeight + matricesTailHeight + 2*svgBorder;
 
     return (
           <div className="all">
@@ -100,22 +126,8 @@ let App = React.createClass({
                     onChange={this.onChange}
                     value={value}
               />
-              <div className="svg-container">
-                <svg className="svg" width={svgWidth} height={svgHeight}>
-                  <g transform={"translate("+svgBorder+","+svgBorder+")"}>
-                    <SortTables {...{rowStrs, sortedStrs, w, h, fontSize, sortMappingDict, cellsWidth, sortArrowsWidth}} />
-                    <CardinalCurve
-                          fromX={svgWidth - w/2}
-                          fromY={cellsHeight}
-                          toX={w/2}
-                          toY={cellsHeight + matricesTailHeight}
-                          weight="1"
-                          upDown={true}
-                          stroke="blue"
-                          fill="transparent"
-                    />
-                  </g>
-                </svg>
+              <div className="content">
+                {sortedTables}
                 <div className="bwt">
                   {bwt}
                 </div>
