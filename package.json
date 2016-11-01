@@ -10,7 +10,8 @@
     "numeric": "^1.2.6",
     "react": "^15.3.2",
     "react-dom": "^15.3.2",
-    "react-localstorage": "^0.3.0"
+    "react-localstorage": "^0.3.0",
+    "underscore": "1.8.3"
   },
   "scripts": {
     "start": "react-scripts start",
