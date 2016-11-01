@@ -15,9 +15,14 @@
   float: left;
 }
 
+.input-container {
+  float: left;
+}
+
 .input {
   font-size: 1.2em;
-  margin-bottom: 10px;
+  margin-bottom: 5px;
+  padding: 10px;
 }
 
 .table {
@@ -26,6 +31,7 @@
 
 .content {
   border: 1px solid black;
+  clear: both;
 }
 
 .cells {
@@ -46,9 +52,22 @@
 
 .examples {
   float: left;
-  padding-right: 10px;
+  padding: 10px;
+  margin-right: -1px;
+  border: 1px solid black;
+}
+
+.examples h4 {
+  margin-top: 0;
+  text-decoration: underline;
 }
 
 .suffixes {
   clear: both;
+}
+
+.github {
+  padding-left: 15px;
+  padding-top: 5px;
+  float: left;
 }

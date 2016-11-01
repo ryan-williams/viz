@@ -11,7 +11,7 @@ import { bwt as BWT } from "burrows-wheeler-transform";
 let runLengthEncode = (s) => {
   let r = [];
   s.split('').forEach((ch) => {
-    if (r.length && r[r.length - 1][0] == ch) {
+    if (r.length && r[r.length - 1][0] === ch) {
       r[r.length - 1][1] += 1;
     } else {
       r.push([ch, 1]);
@@ -56,7 +56,7 @@ let App = React.createClass({
 
     let sortedTables = null;
     let bwt = "";
-    if (n <= 51) {
+    if (n <= 111) {
       let rowStrs = [];
       let rowStrsDict = {};
 
@@ -122,10 +122,13 @@ let App = React.createClass({
               />
             </div>
             <div className="main">
-              <Input
-                    onChange={this.onChange}
-                    value={value}
-              />
+              <div className="input-container">
+                <Input
+                      onChange={this.onChange}
+                      value={value}
+                />
+              </div>
+              <a className="github" href="https://github.com/ryan-williams/bwt"><img width="32" height="32" src="/github.png" /></a>
               <div className="content">
                 {sortedTables}
                 <div className="bwt">
