@@ -1,0 +1,22 @@
+
+svg {
+  width: 50vw;
+  height: 50vh;
+}
+
+.chr {
+  opacity: 0.7;
+}
+
+.chr-yellow {
+  opacity: 0.9;
+}
+
+path {
+  stroke: black;
+  fill: none;
+}
+
+.cell circle {
+  opacity: 0.7;
+}

@@ -1,12 +1,12 @@
 
 import React from 'react';
-import './App.css';
+import './BWT.css';
 import { sqrtInterp } from './interp';
 import { Input, Examples } from './Input';
 import LocalStorageMixin from 'react-localstorage';
 import SortTables from './SortTables';
 import CardinalCurve from './CardinalCurve';
-import { bwt as BWT } from "burrows-wheeler-transform";
+import { bwt as bwtt } from "burrows-wheeler-transform";
 
 let charCmp = (a, b) => {
   if (a === '$') return -1;
@@ -44,7 +44,7 @@ let runLengthEncode = (s) => {
   return r.map(([ch, num]) => num + ch).join('');
 };
 
-let App = React.createClass({
+let BWT = React.createClass({
 
   displayName: 'App',
   mixins: [ LocalStorageMixin ],
@@ -136,7 +136,7 @@ let App = React.createClass({
               </svg>
             </div>;
     } else {
-      bwt = BWT(value, '$').data;
+      bwt = bwtt(value, '$').data;
     }
 
     const rlBWT = runLengthEncode(bwt);
@@ -175,4 +175,4 @@ let App = React.createClass({
   },
 });
 
-export default App;
+export default BWT;
