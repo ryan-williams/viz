@@ -17,7 +17,12 @@ class Examples extends Component {
               this.props.values,
               (value, name) =>
                     <div key={name} className="example">
-                      <a href="#" onClick={(e) => this.props.onClick(name)}>
+                      <a
+                            href=""
+                            onClick={(e) => {
+                              e.preventDefault();
+                              this.props.onClick(name);
+                            }}>
                         {name}
                       </a>
                     </div>
