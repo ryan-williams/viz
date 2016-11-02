@@ -41,7 +41,7 @@ let App = React.createClass({
         "DNA (50)": "ATTTTTAAGAGAAAAAACTGAAAGTTAATAGAGAGGTGACTCAGATCCAG",
         "DNA (100)": "ATTTTTAAGAGAAAAAACTGAAAGTTAATAGAGAGGTGACTCAGATCCAGAGGTGGAAGAGGAAGGAAGCTTGGAACCCTATAGAGTTGCTGAGTGCCAGG",
       },
-      arrowWidthFn: sqrtInterp(100, 100, 200, 150, 400, 200),
+      arrowWidthFn: sqrtInterp(100, 50, 300, 125, 900, 200),
       cellDimFn: sqrtInterp(5, 20, 10, 15, 50, 10, -1)
     };
   },
