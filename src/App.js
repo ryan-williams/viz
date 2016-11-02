@@ -8,6 +8,26 @@ import SortTables from './SortTables';
 import CardinalCurve from './CardinalCurve';
 import { bwt as BWT } from "burrows-wheeler-transform";
 
+let charCmp = (a, b) => {
+  if (a === '$') return -1;
+  if (b === '$') return 1;
+  if (a < b) return -1;
+  if (a > b) return 1;
+  return 0;
+};
+
+let strCmp = (a, b) => {
+  let i = 0;
+  const n = Math.min(a.length, b.length);
+  for (; i < n; i++) {
+    const chCmp = charCmp(a[i], b[i]);
+    if (chCmp !== 0) return chCmp;
+  }
+  if (a.length < b.length) return -1;
+  if (a.length > b.length) return 1;
+  return 0;
+};
+
 let runLengthEncode = (s) => {
   let r = [];
   s.split('').forEach((ch) => {
@@ -31,15 +51,15 @@ let App = React.createClass({
 
   getInitialState() {
     return {
-      //value: "abzy",
       maxWidth: 600,
       examples: {
-        seashells: "she sells seashells by the sea shore",
-        woodchuck: "how much wood would a woodchuck chuck if a woodchuck could chuck wood",
+        seashells: "she sells seashells sea shells sea",
+        woodchuck: "wood would woodchuck chuck woodchuck could chuck wood",
+        tomorrow: "Tomorrow and tomorrow and tomorrow",
         banana: "banana",
-        Mississippi: "Mississippi",
-        "DNA (50)": "ATTTTTAAGAGAAAAAACTGAAAGTTAATAGAGAGGTGACTCAGATCCAG",
-        "DNA (100)": "ATTTTTAAGAGAAAAAACTGAAAGTTAATAGAGAGGTGACTCAGATCCAGAGGTGGAAGAGGAAGGAAGCTTGGAACCCTATAGAGTTGCTGAGTGCCAGG",
+         "DNA (50)": "ATTTTTAAGAGAAAAAACTGAAAGTTAATAATTTTTAAGAGAAAAAACTG",
+        "DNA (100)": "ATTTTTAAGAGAAAAAACTGAAAGTTAATAGAGAGGTGACTCAGATCCAGAGGTGTAAGAGAAAAAACTGAAAGTTAATAGAGAGGTGACTCAGATCCAG",
+        pixies: "SIX.MIXED.PIXIES.SIFT.SIXTY.PIXIE.DUST.BOXES",
       },
       arrowWidthFn: sqrtInterp(100, 50, 300, 125, 900, 200),
       cellDimFn: sqrtInterp(5, 20, 10, 15, 50, 10, -1)
@@ -51,8 +71,9 @@ let App = React.createClass({
   },
 
   render() {
-    const value = (this.state.value || "");
-    const n = value.length + 1;
+    const rawValue = this.state.value || "";
+    let value = rawValue.split('').map((ch) => ch === '\n' ? '$' : ch).join('');
+    const n = value.length;
 
     let sortedTables = null;
     let bwt = "";
@@ -61,17 +82,17 @@ let App = React.createClass({
       let rowStrsDict = {};
 
       for (let r = 0; r < n; r++) {
-        let rowStr = value.substr(r) + '$' + value.substr(0, r);
+        let rowStr = value.substr(r) + value.substr(0, r);
         rowStrsDict[rowStr] = r;
         rowStrs.push(rowStr);
       }
 
-      let sortMappingDict = {};
+      let invSortDict = {};
       let sortedStrs = rowStrs.concat();
-      sortedStrs.sort();
+      sortedStrs.sort(strCmp);
       sortedStrs.forEach((sortedStr, sortedIdx) => {
         let origIdx = rowStrsDict[sortedStr];
-        sortMappingDict[origIdx] = sortedIdx;
+        invSortDict[sortedIdx] = origIdx;
         bwt += sortedStr[n - 1];
       });
 
@@ -93,7 +114,7 @@ let App = React.createClass({
             <div className="svg-container">
               <svg className="svg" width={svgWidth} height={svgHeight}>
                 <g transform={"translate("+svgBorder+","+svgBorder+")"}>
-                  <SortTables {...{rowStrs, sortedStrs, w, h, fontSize, sortMappingDict, cellsWidth, sortArrowsWidth}} />
+                  <SortTables {...{rowStrs, sortedStrs, w, h, fontSize, invSortDict, cellsWidth, sortArrowsWidth}} />
                   <CardinalCurve
                         fromX={svgWidth - w/2}
                         fromY={cellsHeight}
@@ -124,7 +145,7 @@ let App = React.createClass({
                 <Input
                       cols={50}
                       onChange={this.onChange}
-                      value={value}
+                      value={rawValue}
                 />
               </div>
               <a className="github" href="https://github.com/ryan-williams/bwt">

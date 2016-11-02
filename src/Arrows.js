@@ -5,12 +5,12 @@ import CardinalCurve from './CardinalCurve';
 
 class Arrows extends Component {
   render() {
-    const {sortMappingDict, width, h} = this.props;
+    const {invSortDict, width, h} = this.props;
     return <g className="arrows">
       {
         _.map(
-              sortMappingDict,
-              (to, from) =>
+              invSortDict,
+              (from, to) =>
                     <Curve key={from} {...{ width, h, from, to }} />
         )
       }

@@ -1,18 +1,37 @@
 
 import React, { Component } from 'react';
 import Arrows from './Arrows';
+import _ from 'underscore';
 
 class SortTables extends Component {
   render() {
-    const { w, h, fontSize, rowStrs, sortedStrs, sortMappingDict, cellsWidth, sortArrowsWidth } = this.props;
+    const { w, h, fontSize, rowStrs, sortedStrs, invSortDict, cellsWidth, sortArrowsWidth } = this.props;
     const n = rowStrs.length;
     return <g className="sort-tables-row">
-      <SvgCells name="suffixes" {...{w, h, fontSize, rowStrs}} />
+      <SvgCells
+            name="suffixes"
+            {
+              ...{
+                w, h, fontSize, rowStrs,
+                masksDict: _.range(0, n)
+              }
+            }
+      />
       <g className="arrows-container" transform={"translate(" + cellsWidth + ",0)"}>
-        <Arrows {...{sortMappingDict, width: sortArrowsWidth, h}} />
+        <Arrows {...{invSortDict, width: sortArrowsWidth, h}} />
       </g>
       <g className="cells-container" transform={"translate(" + (cellsWidth + sortArrowsWidth) + ",0)"}>
-        <SvgCells name="sorted-suffixes" {...{ w, h, fontSize, rowStrs: sortedStrs, highlightCol: n-1 }} />
+        <SvgCells
+              name="sorted-suffixes"
+              {
+                ...{
+                  w, h, fontSize,
+                  masksDict: invSortDict,
+                  rowStrs: sortedStrs,
+                  highlightCol: n-1
+                }
+              }
+        />
       </g>
     </g>;
   }
@@ -20,7 +39,7 @@ class SortTables extends Component {
 
 class SvgCells extends Component {
   render() {
-    const { w, h, rowStrs, fontSize, highlightCol } = this.props;
+    const { w, h, rowStrs, fontSize, highlightCol, masksDict } = this.props;
 
     const n = rowStrs.length;
 
@@ -28,6 +47,9 @@ class SvgCells extends Component {
     rowStrs.forEach((rowStr, r) => {
       let masking = false;
       rowStr.split('').forEach((ch, c) => {
+        if (masksDict && (r in masksDict) && c + masksDict[r] === n) {
+          masking = true;
+        }
         let className =
               (c === highlightCol) ?
                     "highlighted" :
@@ -48,9 +70,6 @@ class SvgCells extends Component {
                 {ch}
               </text>
         );
-        if (ch === '$') {
-          masking = true;
-        }
       });
     });
     return <g className={['letters'].concat([this.props.name] || []).join(' ')}>
