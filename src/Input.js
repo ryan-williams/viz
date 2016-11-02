@@ -4,7 +4,7 @@ import React, { Component } from 'react';
 
 class Input extends Component {
   render() {
-    return <textarea className="input" cols="50" rows="4" {...this.props} />;
+    return <textarea className="input" {...this.props} />;
   }
 }
 

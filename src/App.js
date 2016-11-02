@@ -115,22 +115,25 @@ let App = React.createClass({
 
     return (
           <div className="all">
-            <div className="left">
+            <div className="top-row">
               <Examples
                     values={this.state.examples}
                     onClick={(name) => this.setState({ value: this.state.examples[name] })}
               />
-            </div>
-            <div className="main">
               <div className="input-container">
                 <Input
+                      cols={50}
                       onChange={this.onChange}
                       value={value}
                 />
               </div>
-              <a className="github" href="https://github.com/ryan-williams/bwt"><img width="32" height="32" src="/github.png" /></a>
-              <div className="content">
-                {sortedTables}
+              <a className="github" href="https://github.com/ryan-williams/bwt">
+                <img width="32" height="32" src="/github.png" alt="GitHub icon" />
+              </a>
+            </div>
+            <div className="viz">
+              {sortedTables}
+              <div className="bwts">
                 <div className="bwt">
                   {bwt}
                 </div>
