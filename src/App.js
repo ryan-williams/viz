@@ -28,6 +28,10 @@ let strCmp = (a, b) => {
   return 0;
 };
 
+let keyCmp = (cmpFn) => {
+  return (a, b) => cmpFn(a[0], b[0]);
+};
+
 let runLengthEncode = (s) => {
   let r = [];
   s.split('').forEach((ch) => {
@@ -73,27 +77,30 @@ let App = React.createClass({
   render() {
     const rawValue = this.state.value || "";
     let value = rawValue.split('').map((ch) => ch === '\n' ? '$' : ch).join('');
+    if (value && value[value.length - 1] !== '$') {
+      value += '$';
+    }
     const n = value.length;
 
     let sortedTables = null;
     let bwt = "";
     if (n <= 111) {
       let rowStrs = [];
-      let rowStrsDict = {};
 
       for (let r = 0; r < n; r++) {
-        let rowStr = value.substr(r) + value.substr(0, r);
-        rowStrsDict[rowStr] = r;
-        rowStrs.push(rowStr);
+        const prefix = value.substr(0, r), suffix = value.substr(r);
+        rowStrs.push([suffix, prefix, r]);
       }
 
       let invSortDict = {};
       let sortedStrs = rowStrs.concat();
-      sortedStrs.sort(strCmp);
-      sortedStrs.forEach((sortedStr, sortedIdx) => {
-        let origIdx = rowStrsDict[sortedStr];
-        invSortDict[sortedIdx] = origIdx;
-        bwt += sortedStr[n - 1];
+      sortedStrs.sort(keyCmp(strCmp));
+      sortedStrs = sortedStrs.map(([suffix, prefix, origIndex], sortedIdx) => {
+        invSortDict[sortedIdx] = origIndex;
+        bwt += prefix ? prefix[prefix.length - 1] : suffix[suffix.length - 1];
+        const str = suffix + prefix;
+        rowStrs[origIndex] = str;
+        return str;
       });
 
       const w = this.state.cellDimFn(n);

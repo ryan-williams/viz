@@ -47,16 +47,24 @@ class SvgCells extends Component {
     rowStrs.forEach((rowStr, r) => {
       let masking = false;
       rowStr.split('').forEach((ch, c) => {
-        if (masksDict && (r in masksDict) && c + masksDict[r] === n) {
-          masking = true;
+        let lastCol = false;
+        if (masksDict && (r in masksDict)) {
+          if (c + masksDict[r] === n) {
+            masking = true;
+          } else if (c + 1 + masksDict[r] === n) {
+            console.log("last:", r, c, masksDict[r], n);
+            lastCol = true;
+          }
         }
         let className =
+              lastCol ? "last" : (
               (c === highlightCol) ?
                     "highlighted" :
                     (masking ?
                           "masked" :
                           ""
-                    );
+                    )
+              );
         cells.push(
               <text
                     key={r+","+c}
@@ -72,7 +80,11 @@ class SvgCells extends Component {
         );
       });
     });
+
+    const highlightRec = highlightCol === undefined ? null : <rect fill="yellow" x={highlightCol * w} y="1" width={w - 1} height={n * h - 2} />;
+
     return <g className={['letters'].concat([this.props.name] || []).join(' ')}>
+      {highlightRec}
       {cells}
       <rect stroke="black" fill="transparent" x="0" y="0" width={n * w} height={n * h} />
     </g>;

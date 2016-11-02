@@ -45,6 +45,10 @@
   font-weight: bold;
 }
 
+.last {
+  font-weight: bold;
+}
+
 .bwt {
   font-family: monospace;
 }
