@@ -66,7 +66,7 @@ const Cells = React.createClass({
                       />
           );
     return <div>
-      <svg onDoubleClick={this.newCell}>
+      <svg className="cells" onDoubleClick={this.newCell}>
         <defs>{gradients}</defs>
         {cellObjs}
       </svg>

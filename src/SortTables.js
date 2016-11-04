@@ -4,6 +4,7 @@ import Arrows from './Arrows';
 import _ from 'underscore';
 import { sqrtInterp } from './interp';
 import { M, H, V } from './path';
+import { DraggableCore } from 'react-draggable';
 
 class SortTables extends Component {
   render() {
@@ -48,6 +49,9 @@ let SvgCells = React.createClass({
 
   render() {
     let { w, h, rowStrs, rows, fontSize, highlightCol, highlightRow, masksDict, hLines, vLines } = this.props;
+
+    if (highlightCol < 0) highlightCol = undefined;
+    if (highlightRow < 0) highlightRow = undefined;
 
     hLines = hLines || [];
     vLines = vLines || [];
@@ -138,14 +142,21 @@ let SvgCells = React.createClass({
     lines = lines.concat(hLines.map((y) => <path key={"h" + y} d={M(0, y*h) + H(w * n)} />));
     lines = lines.concat(vLines.map((x) => <path key={"v" + x} d={M(x*w, 0) + V(h * n)} />));
 
-    return <g className={['letters'].concat([this.props.name] || []).join(' ')}>
+    return <DraggableCore onMouseDown={this.onMouseDown}>
+      <g className={['letters'].concat([this.props.name] || []).join(' ')}>
       {highlightColRec}
       {highlightRowRec}
       {highlightRowColRec}
       {cells}
       {lines}
       <rect stroke="black" fill="transparent" x="0" y="0" width={n * w} height={n * h} />
-    </g>;
+      </g></DraggableCore>;
+  },
+
+  onMouseDown(e, ui) {
+    if (this.props.onMouseDown) {
+      this.props.onMouseDown(e, ui);
+    }
   }
 });
 

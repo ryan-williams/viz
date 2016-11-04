@@ -6,5 +6,6 @@ const L = (x, y) => "L" + p(x, y) + " ";
 const H = (x) => "H" + x + " ";
 const V = (y) => "V" + y + " ";
 const C = (c1x, c1y, c2x, c2y, toX, toY) => "C" + [ p(c1x, c1y), p(c2x, c2y), p(toX, toY) ].join(' ') + ' ';
+const S = (c2x, c2y, toX, toY) => "S" + [ p(c2x, c2y), p(toX, toY) ].join(' ') + ' ';
 
-export { M, L, H, V, C };
+export { M, L, H, V, C, S };
