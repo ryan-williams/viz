@@ -1,15 +1,15 @@
 
 import React, { Component } from 'react';
 import _ from 'underscore';
+
+import LocalStorageMixin from 'react-localstorage';
+import { DraggableCore } from 'react-draggable';
+
 import './cells.css'
-
-import seedrandom from 'seedrandom';
-
-const random = seedrandom(8);
 
 const { sqrt, abs } = Math;
 
-const rand = (n) => parseInt(random() * n, 10);
+import { random, rand } from './random';
 
 const Cells = React.createClass({
   getInitialState() {
@@ -29,16 +29,44 @@ const Cells = React.createClass({
     }
   },
 
+  mixins: [ LocalStorageMixin ],
+
+  getStateFilterKeys() {
+    return [ 'cells' ];
+  },
+
   shuffle() {
-    this.setState({});
+    this.setState({ drawChroms: true });
+  },
+
+  newCell(e) {
+    const { offsetX, offsetY } = e.nativeEvent;
+    let cells = this.state.cells.concat();
+    cells.push({ r: 80, x: offsetX, y: offsetY });
+    this.setState({ cells });
+  },
+
+  moveCell(idx, dx, dy) {
+    let cells = this.state.cells.concat();
+    cells[idx] = { r: cells[idx].r, x: cells[idx].x + dx, y: cells[idx].y + dy };
+    this.setState({ cells });
   },
 
   render() {
     const { colors, cells } = this.state;
     const gradients = _.map(colors, (color, id) => <Gradient {...color} id={id} key={id} />);
-    const cellObjs = cells.map((cell, i) => <Cell key={i} {...cell} />);
+    const cellObjs =
+          cells.map(
+                (cell, i) =>
+                      <Cell
+                            key={i}
+                            idx={i}
+                            moved={(dx, dy) => this.moveCell(i, dx, dy)}
+                            {...cell}
+                      />
+          );
     return <div>
-      <svg>
+      <svg onDoubleClick={this.newCell}>
         <defs>{gradients}</defs>
         {cellObjs}
       </svg>
@@ -61,22 +89,32 @@ class Gradient extends Component {
 const Cell = React.createClass({
 
   getInitialState() {
+    const chrs = [
+      { size: 1, color: 'red' },
+      { size: 0.9, color: 'orange' },
+      { size: 0.8, color: 'yellow' },
+      { size: 0.7, color: 'green' },
+      { size: 0.6, color: 'blue' }
+    ];
+
+    const maxChrRatio = 1.2, chrHeightRatio = 0.1;
+
+    let chrRects = [];
+    chrs.forEach(({size, color}, idx) => {
+      chrRects.push(this.getChrRect(size, color, 2*idx, maxChrRatio, chrHeightRatio));
+      chrRects.push(this.getChrRect(size, color, 2*idx + 1, maxChrRatio, chrHeightRatio));
+    });
+
     return {
-      maxChrRatio: 1.2,
-      chrHeightRatio: 0.2,
-      chrs: [
-        { size: 1, color: 'red' },
-        { size: 0.9, color: 'orange' },
-        { size: 0.8, color: 'yellow' },
-        { size: 0.7, color: 'green' },
-        { size: 0.6, color: 'blue' }
-      ]
+      maxChrRatio,
+      chrHeightRatio,
+      chrs,
+      chrRects
     };
   },
 
-  getChrRect(size, color, idx) {
+  getChrRect(size, color, idx, maxChrRatio, chrHeightRatio) {
     const { r } = this.props;
-    const { maxChrRatio, chrHeightRatio } = this.state;
     const r2 = r*r;
 
     // chr rect dimensions
@@ -107,31 +145,38 @@ const Cell = React.createClass({
     const y = -h / 2 + dy;
 
     return <g key={idx} transform={"rotate(" + rand(360) + ")"}>
-      <rect
-            className={"chr chr-" + color}
-            width={rawW}
-            height={rawH}
-            x={x + pad/2}
-            y={y + pad/2}
-            fill={"url(#" + color + " )"}
-            stroke="none"
-      />
-    </g>;
+        <rect
+              className={"chr chr-" + color}
+              width={rawW}
+              height={rawH}
+              x={x + pad/2}
+              y={y + pad/2}
+              fill={"url(#" + color + " )"}
+              stroke="none"
+        />
+    </g>
+          ;
+  },
+
+  onDrag(e, ui) {
+    this.props.moved(ui.deltaX, ui.deltaY);
   },
 
   render() {
     const { r, x, y } = this.props;
-    const { chrs } = this.state;
-    let chrRects = [];
-    chrs.forEach(({size, color}, idx) => {
-      chrRects.push(this.getChrRect(size, color, 2*idx));
-      chrRects.push(this.getChrRect(size, color, 2*idx + 1));
-    });
+    const { chrRects } = this.state;
 
-    return <g className="cell" transform={"translate(" + x + "," + y + ")"}>
-      <circle r={r} cx={0} cy={0} stroke="black" fill="white" />
-      {chrRects}
-    </g>;
+    return <DraggableCore onDrag={this.onDrag}>
+      <g
+            className="cell"
+            transform={"translate(" + x + "," + y + ")"}
+      >
+        <circle r={r} cx={0} cy={0} stroke="black" fill="white" />
+        <Dot />
+        {chrRects}
+      </g>
+    </DraggableCore>
+          ;
   }
 });
 

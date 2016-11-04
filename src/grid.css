@@ -1,0 +1,28 @@
+
+svg {
+  width: 100vw;
+  height: 100vh;
+}
+
+.highlight-row {
+  fill: lightblue;
+}
+
+.highlight-col {
+  fill: yellow;
+}
+
+.highlight-row-col {
+  fill: lightgreen;
+}
+
+.arrow {
+  fill: none;
+  stroke: red;
+  marker-end: url(#Triangle);
+}
+
+.head {
+  fill: red;
+  stroke: red;
+}
