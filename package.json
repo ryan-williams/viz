@@ -12,6 +12,7 @@
     "react-dom": "^15.3.2",
     "react-draggable": "^2.2.2",
     "react-localstorage": "^0.3.0",
+    "react-mixin": "^3.0.5",
     "react-router": "^3.0.0",
     "seedrandom": "^2.4.2",
     "underscore": "1.8.3"

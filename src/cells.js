@@ -4,6 +4,7 @@ import _ from 'underscore';
 
 import LocalStorageMixin from 'react-localstorage';
 import { DraggableCore } from 'react-draggable';
+import reactMixin from 'react-mixin';
 
 import './cells.css'
 
@@ -11,9 +12,10 @@ const { sqrt, abs } = Math;
 
 import { random, rand } from './random';
 
-const Cells = React.createClass({
-  getInitialState() {
-    return {
+export default class Cells extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
       colors: {
           red: { beg: "#ff6666", mid: "#ff0000", end: "#b30000" },
           orange: { beg: "#ffc266", mid: "#ff9900", end: "#b36b00" },
@@ -27,33 +29,39 @@ const Cells = React.createClass({
         { r: 80, x: 300, y: 100 }
       ]
     }
-  },
+  }
 
-  mixins: [ LocalStorageMixin ],
-
-  getStateFilterKeys() {
+  getStateFilterKeys = () => {
     return [ 'cells' ];
-  },
+  };
 
-  shuffle() {
-    this.setState({ drawChroms: true });
-  },
+  doRedrawChroms = () => {
+    this.redrawChroms = true;
+    this.forceUpdate();
+  };
 
-  newCell(e) {
+  componentDidUpdate = () => {
+    if (this.redrawChroms) {
+      this.redrawChroms = false;
+    }
+  };
+
+  newCell = (e) => {
     const { offsetX, offsetY } = e.nativeEvent;
     let cells = this.state.cells.concat();
     cells.push({ r: 80, x: offsetX, y: offsetY });
     this.setState({ cells });
-  },
+  };
 
-  moveCell(idx, dx, dy) {
+  moveCell = (idx, dx, dy) => {
     let cells = this.state.cells.concat();
     cells[idx] = { r: cells[idx].r, x: cells[idx].x + dx, y: cells[idx].y + dy };
     this.setState({ cells });
-  },
+  };
 
   render() {
     const { colors, cells } = this.state;
+    const { redrawChroms } = this;
     const gradients = _.map(colors, (color, id) => <Gradient {...color} id={id} key={id} />);
     const cellObjs =
           cells.map(
@@ -63,6 +71,7 @@ const Cells = React.createClass({
                             idx={i}
                             moved={(dx, dy) => this.moveCell(i, dx, dy)}
                             {...cell}
+                            {...{ redrawChroms }}
                       />
           );
     return <div>
@@ -70,10 +79,12 @@ const Cells = React.createClass({
         <defs>{gradients}</defs>
         {cellObjs}
       </svg>
-      <input type="button" onClick={this.shuffle} value="Redraw" />
+      <input type="button" onClick={this.doRedrawChroms} value="Redraw" />
     </div>;
   }
-});
+}
+
+reactMixin(Cells.prototype, LocalStorageMixin);
 
 class Gradient extends Component {
   render() {
@@ -86,9 +97,11 @@ class Gradient extends Component {
   }
 }
 
-const Cell = React.createClass({
+class Cell extends Component {
 
-  getInitialState() {
+  constructor(props) {
+    super(props);
+
     const chrs = [
       { size: 1, color: 'red' },
       { size: 0.9, color: 'orange' },
@@ -99,21 +112,33 @@ const Cell = React.createClass({
 
     const maxChrRatio = 1.2, chrHeightRatio = 0.1;
 
-    let chrRects = [];
-    chrs.forEach(({size, color}, idx) => {
-      chrRects.push(this.getChrRect(size, color, 2*idx, maxChrRatio, chrHeightRatio));
-      chrRects.push(this.getChrRect(size, color, 2*idx + 1, maxChrRatio, chrHeightRatio));
-    });
+    const chrRects = this.getChrRects(chrs, maxChrRatio, chrHeightRatio);
 
-    return {
+    this.state = {
       maxChrRatio,
       chrHeightRatio,
       chrs,
       chrRects
     };
-  },
+  }
 
-  getChrRect(size, color, idx, maxChrRatio, chrHeightRatio) {
+  componentWillReceiveProps = (newProps) => {
+    if (newProps.redrawChroms) {
+      const { chrs, maxChrRatio, chrHeightRatio } = this.state;
+      this.setState({ chrRects: this.getChrRects(chrs, maxChrRatio, chrHeightRatio) });
+    }
+  };
+
+  getChrRects = (chrs, maxChrRatio, chrHeightRatio) => {
+    let chrRects = [];
+    chrs.forEach(({size, color}, idx) => {
+      chrRects.push(this.getChrRect(size, color, 2*idx, maxChrRatio, chrHeightRatio));
+      chrRects.push(this.getChrRect(size, color, 2*idx + 1, maxChrRatio, chrHeightRatio));
+    });
+    return chrRects;
+  };
+
+  getChrRect = (size, color, idx, maxChrRatio, chrHeightRatio) => {
     const { r } = this.props;
     const r2 = r*r;
 
@@ -156,11 +181,11 @@ const Cell = React.createClass({
         />
     </g>
           ;
-  },
+  };
 
-  onDrag(e, ui) {
+  onDrag = (e, ui) => {
     this.props.moved(ui.deltaX, ui.deltaY);
-  },
+  };
 
   render() {
     const { r, x, y } = this.props;
@@ -178,7 +203,7 @@ const Cell = React.createClass({
     </DraggableCore>
           ;
   }
-});
+}
 
 // eslint-disable-next-line
 class Dot extends Component {
@@ -187,5 +212,3 @@ class Dot extends Component {
     return <circle r="2" cx={x} cy={y} fill="black" />
   }
 }
-
-export default Cells;
