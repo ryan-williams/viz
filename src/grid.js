@@ -38,7 +38,7 @@ const PrefixSum = React.createClass({
 
     const partitionCDF =
           data.map((gridRow, R) =>
-                gridRow.map((grid, C) => {
+                gridRow.map((grid) => {
                   let summedGrid = grid.map((row) => row.concat());
                   _.range(h).forEach((r) => {
                     _.range(w - 1, -1, -1).forEach((c) => {
@@ -79,7 +79,7 @@ const PrefixSum = React.createClass({
                     );
 
               let diagSum =
-                    sum(_.range(0, R-1).map((UR) =>
+                    sum(_.range(0, R).map((UR) =>
                       sum(_.range(C+1, W).map((RC) =>
                         partitionCDF[UR][RC][h - 1][0]
                       ))
