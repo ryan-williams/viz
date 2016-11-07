@@ -37,6 +37,7 @@ class Curve extends Component {
   render() {
     const { width, h, from, to } = this.props;
     return <CardinalCurve
+          weight={0.5}
           className="arrow"
           stroke="red"
           fill="transparent"
