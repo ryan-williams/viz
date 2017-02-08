@@ -90,6 +90,15 @@ let SvgCells = React.createClass({
 
         const attrs = attrsFn && attrsFn(r, c, ch) || {};
 
+        const backgroundRect =
+              attrs.backgroundClass ?
+                    <rect
+                          x={0} y={0}
+                          width={w} height={h}
+                          className={attrs.backgroundClass}
+                    /> :
+                    null;
+
         let lastCol = false;
 
         if (masksDict && (r in masksDict)) {
@@ -118,6 +127,7 @@ let SvgCells = React.createClass({
                     x={w * c}
                     y={h * r}
               >
+                {backgroundRect}
                 <text
                       x={w / 2}
                       y={h / 2}

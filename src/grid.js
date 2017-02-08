@@ -95,7 +95,7 @@ const PrefixSum = React.createClass({
           );
 
     return {
-      data, w, h, W, H, cellW, cellH, padX, padY, braceWidth, fontSize, yLabelWidth, xLabelHeight, CDF,
+      data, w, h, W, H, cellW, cellH, padX, padY, braceWidth, fontSize, yLabelWidth, xLabelHeight, partitionCDF, CDF,
       drawArrows: false,
       selectOnMouseOver: true,
       label:
@@ -146,7 +146,7 @@ const PrefixSum = React.createClass({
 
   render() {
     const {
-          data, CDF,
+          data, partitionCDF, CDF,
           w, h,
           W, H,
           cellW, cellH,
@@ -161,7 +161,7 @@ const PrefixSum = React.createClass({
       <div className="controls" style={{ position: "relative", top: (padY / 2) + "px" }}>
         <input type="button" onClick={this.prev} value="Prev" disabled={stepIdx === -1}/>
         <input type="button" onClick={this.next} value="Next" disabled={stepIdx + 1 === steps.length}/>
-        <div className="label">{label}</div>
+        <div className="label" onClick={this.next}>{label}</div>
       </div>
       <svg height={H * (h * cellH + padY) + xLabelHeight} width={W * (w * cellW + padX) + yLabelWidth}>
         <defs>
@@ -180,7 +180,7 @@ const PrefixSum = React.createClass({
         <Translate y={padY/2 + 1}>
           <Grids {...{
             data,
-            selectedData: CDF,
+            selectedData: partitionCDF,
             w, h,
             W, H,
             padX, padY,
@@ -398,7 +398,7 @@ let Grids = React.createClass({
 
                   return <Translate className={className} x={C * paddedGridWidth} y={R * paddedGridHeight}>
                       <Grid
-                            {...{grid, R, C, selectedCell: selectOnMouseOver && selectedCell}}
+                            {...{grid, selectedGrid: selectedData[R][C], R, C, selectedCell: selectOnMouseOver && selectedCell}}
                             {...this.props}
                             onMouseDown={(e, ui) => this.onMouseDown(e, ui, R, C)}
                             selectCellFn={selectOnMouseOver ? this.cellSelected : null}
@@ -483,7 +483,7 @@ let Grids = React.createClass({
 let Grid = React.createClass({
   render() {
     let {
-          grid,
+          grid, selectedGrid,
           R, C,
           w, h,
           W,
@@ -536,15 +536,22 @@ let Grid = React.createClass({
       }
     }
 
-    const renderFn = (r, c, ch) => ch === 0 ? '-' : null;
+    const renderFn = (r, c, ch) =>
+          (selectRect &&
+          r === selectRect.r &&
+          c === selectRect.c) ?
+                selectedGrid[r][c] :
+                (ch === 0 ? '-' : null);
+
     const attrsFn =
           (r, c, ch) =>
-                (selectedCell &&
-                selectedCell.R === R &&
-                selectedCell.C === C &&
-                selectedCell.r === r &&
-                selectedCell.c === c) ?
-                      { fontWeight: "bold" } :
+                (selectedCell && selectRect &&
+                r === selectRect.r &&
+                c === selectRect.c) ?
+                      {
+                        fontWeight: "bold",
+                        backgroundClass: "text-background"
+                      } :
                       {};
 
     return <g>

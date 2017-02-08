@@ -16,10 +16,19 @@ svg {
   float: left;
   width: 20vw;
   padding-right: 10px;
+  padding-bottom: 30px;
 }
 
 .label {
   padding: 10px 0;
+}
+
+.text-background {
+  fill: #bbb;
+}
+
+.select-rect {
+  fill: #ddd;
 }
 
 input {
@@ -32,10 +41,6 @@ input {
 
 .highlight-col {
   fill: yellow;
-}
-
-.select-rect {
-  fill: lightgrey;
 }
 
 .highlight-row-col {
