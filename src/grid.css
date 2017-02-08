@@ -1,20 +1,25 @@
 
 body {
-  padding: 30px 0px 0px 30px;
+  padding: 10px 0 0 30px;
 }
 
 svg {
   float: left;
+  padding-left: 10px;
+}
+
+.label div {
+  padding-bottom: 10px;
 }
 
 .controls {
   float: left;
-  max-width: 20vw;
+  width: 20vw;
   padding-right: 10px;
 }
 
 .label {
-  padding: 10px 0px;
+  padding: 10px 0;
 }
 
 input {
@@ -27,6 +32,10 @@ input {
 
 .highlight-col {
   fill: yellow;
+}
+
+.select-rect {
+  fill: lightgrey;
 }
 
 .highlight-row-col {

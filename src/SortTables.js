@@ -1,10 +1,10 @@
 
 import React, { Component } from 'react';
 import Arrows from './Arrows';
+import Translate from './translate';
 import _ from 'underscore';
 import { sqrtInterp } from './interp';
 import { M, H, V } from './path';
-import { DraggableCore } from 'react-draggable';
 
 class SortTables extends Component {
   render() {
@@ -48,7 +48,19 @@ let SvgCells = React.createClass({
   },
 
   render() {
-    let { w, h, rowStrs, rows, fontSize, highlightCol, highlightRow, masksDict, hLines, vLines } = this.props;
+    let {
+          w, h,
+          rowStrs,
+          rows,
+          fontSize,
+          highlightCol, highlightRow,
+          masksDict,
+          hLines, vLines,
+          cellMouseEnterFn,
+          selectRect,
+          renderFn,
+          attrsFn
+    } = this.props;
 
     if (highlightCol < 0) highlightCol = undefined;
     if (highlightRow < 0) highlightRow = undefined;
@@ -59,7 +71,9 @@ let SvgCells = React.createClass({
     if (!rows) {
       rows = rowStrs.map((rowStr) => rowStr.split(''));
     }
-    const n = rows.length;
+
+    const m = rows ? rows.length : 0
+    const n = rows ? rows[0].length : 0;
 
     if (!w || !h || !fontSize) {
       w = this.state.cellDimFn(n);
@@ -71,7 +85,13 @@ let SvgCells = React.createClass({
     rows.forEach((row, r) => {
       let masking = false;
       row.forEach((ch, c) => {
+
+        const label = renderFn && renderFn(r, c, ch) || ch;
+
+        const attrs = attrsFn && attrsFn(r, c, ch) || {};
+
         let lastCol = false;
+
         if (masksDict && (r in masksDict)) {
           if (c + masksDict[r] === n) {
             masking = true;
@@ -80,6 +100,7 @@ let SvgCells = React.createClass({
             lastCol = true;
           }
         }
+
         let className =
               lastCol ? "last" : (
               (c === highlightCol || r === highlightRow) ?
@@ -89,21 +110,46 @@ let SvgCells = React.createClass({
                           ""
                     )
               );
+
         cells.push(
-              <text
-                    key={r+","+c}
-                    x={w*(c+.5)}
-                    y={h*(r+.5)}
-                    textAnchor="middle"
-                    dominantBaseline="middle"
-                    fontSize={fontSize}
-                    className={className}
+              <Translate
+                    key={r + "-" + c}
+                    className="cell"
+                    x={w * c}
+                    y={h * r}
               >
-                {ch}
-              </text>
+                <text
+                      x={w / 2}
+                      y={h / 2}
+                      textAnchor="middle"
+                      dominantBaseline="middle"
+                      fontSize={fontSize}
+                      className={className}
+                      {...attrs}
+                >
+                  {label}
+                </text>
+                <rect
+                      x={0} y={0}
+                      width={w} height={h}
+                      fill="transparent"
+                      onMouseEnter={cellMouseEnterFn && cellMouseEnterFn(r, c)}
+                />
+              </Translate>
         );
       });
     });
+
+    const selectRec =
+          !selectRect ?
+                null :
+                <rect
+                  className="select-rect"
+                  x={selectRect.c * w}
+                  y={1}
+                  width={(n - selectRect.c) * w - 1}
+                  height={(selectRect.r + 1) * h - 2}
+                />;
 
     const highlightColRec =
           highlightCol === undefined ?
@@ -113,7 +159,7 @@ let SvgCells = React.createClass({
                       x={highlightCol * w}
                       y="1"
                       width={w - 1}
-                      height={n * h - 2}
+                      height={m * h - 2}
                 />;
 
     const highlightRowRec =
@@ -140,19 +186,25 @@ let SvgCells = React.createClass({
 
     let lines = [];
     lines = lines.concat(hLines.map((y) => <path key={"h" + y} d={M(0, y*h) + H(w * n)} />));
-    lines = lines.concat(vLines.map((x) => <path key={"v" + x} d={M(x*w, 0) + V(h * n)} />));
+    lines = lines.concat(vLines.map((x) => <path key={"v" + x} d={M(x*w, 0) + V(h * m)} />));
 
-    return <DraggableCore onMouseDown={this.onMouseDown}>
-      <g className={['letters'].concat([this.props.name] || []).join(' ')}>
+    return <g
+          onMouseDown={this.onMouseDown}
+          className={['letters'].concat([this.props.name] || []).join(' ')}>
+      <rect
+            stroke="black"
+            fill="transparent"
+            x="0" y="0"
+            width={n * w} height={m * h}
+      />
+      {selectRec}
       {highlightColRec}
       {highlightRowRec}
       {highlightRowColRec}
       {cells}
       {lines}
-      <rect stroke="black" fill="transparent" x="0" y="0" width={n * w} height={n * h} />
-      </g></DraggableCore>;
+    </g>;
   },
-
   onMouseDown(e, ui) {
     if (this.props.onMouseDown) {
       this.props.onMouseDown(e, ui);

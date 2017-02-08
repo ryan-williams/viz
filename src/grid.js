@@ -16,7 +16,7 @@ let sum = (arr) => arr.length ? arr.reduce(add) : 0;
 
 const PrefixSum = React.createClass({
   getInitialState() {
-    const w = 3, h = 3, W = 3, H = 3;
+    const w = 6, h = 5, W = 3, H = 3;
     const data =
           _.range(H).map((R) =>
             _.range(W).map((C) =>
@@ -30,11 +30,12 @@ const PrefixSum = React.createClass({
 
     const cellW = 30;
     const cellH = 20;
-    const padX = 5;
-    const padY = 5;
-    const extraPadX = padX + cellW;
-    const extraPadY = padY + cellH*1.5;
+    const padX = cellW + 5;
+    const padY = cellH + 5;
     const braceWidth = 10;
+    let fontSize = 14;
+    let yLabelWidth = cellW + 5;
+    let xLabelHeight = cellH + 7;
 
     const partitionCDF =
           data.map((gridRow, R) =>
@@ -94,9 +95,22 @@ const PrefixSum = React.createClass({
           );
 
     return {
-      data, w, h, W, H, cellW, cellH, padX, padY, braceWidth,
+      data, w, h, W, H, cellW, cellH, padX, padY, braceWidth, fontSize, yLabelWidth, xLabelHeight, CDF,
       drawArrows: false,
-      label: "Given a distributed 2D-array, perform a 2D-prefix sum…",
+      selectOnMouseOver: true,
+      label:
+            <div>
+              <div>
+                Given a distributed (maybe sparse) 2D-array, perform a 2D-prefix sum:
+              </div>
+              <div>
+                Replace each element with the sum of all elements at higher row- and column-coordinates.
+              </div>
+              <div>
+                Each element is keyed – and the collection partitioned upstream – by its coordinates, which are only
+                shown along the sides here, to reduce clutter.
+              </div>
+            </div>,
       highlightCol: -1, highlightRow: -1,
       stepIdx: -1,
       steps: [
@@ -106,12 +120,9 @@ const PrefixSum = React.createClass({
         },
         {
           highlightCol: 0,
-          highlightRow: data.length - 1,
+          highlightRow: data[0][0].length - 1,
+          selectOnMouseOver: false,
           label: "Each partition will emit its left col, bottom row, and bottom-left elem to other partitions left, below, and below-left of it, respectively"
-        },
-        {
-          padX: extraPadX,
-          padY: extraPadY
         },
         {
           drawArrows: true,
@@ -134,15 +145,25 @@ const PrefixSum = React.createClass({
   },
 
   render() {
-    const { data, w, h, W, H, cellW, cellH, padX, padY, highlightCol, highlightRow, drawArrows, braceWidth, label, stepIdx, steps } = this.state;
+    const {
+          data, CDF,
+          w, h,
+          W, H,
+          cellW, cellH,
+          padX, padY,
+          highlightCol, highlightRow,
+          yLabelWidth, xLabelHeight,
+          drawArrows, braceWidth, fontSize, label, stepIdx, steps, selectOnMouseOver
+    } =
+          this.state;
 
     return <div onKeyDown={this.onKeyPress}>
-      <div className="controls">
+      <div className="controls" style={{ position: "relative", top: (padY / 2) + "px" }}>
         <input type="button" onClick={this.prev} value="Prev" disabled={stepIdx === -1}/>
         <input type="button" onClick={this.next} value="Next" disabled={stepIdx + 1 === steps.length}/>
-        <div className="label">{(stepIdx + 1) + ": " + label}</div>
+        <div className="label">{label}</div>
       </div>
-      <svg height={H*(h*cellH + padY)} width={W*(w*cellW + padX)}>
+      <svg height={H * (h * cellH + padY) + xLabelHeight} width={W * (w * cellW + padX) + yLabelWidth}>
         <defs>
           <marker id="Triangle"
                   viewBox="0 0 10 10"
@@ -154,9 +175,20 @@ const PrefixSum = React.createClass({
             <path className="head" d="M0,0 L10,5 L0,10 z" />
           </marker>
         </defs>
-        <Translate  y={padY/2 + 1}>
+
+        {/* The vertical padding leaves room on top for arrows to be drawn.*/}
+        <Translate y={padY/2 + 1}>
           <Grids {...{
-            data, w, h, W, H, padX, padY, cellW, cellH, highlightCol, highlightRow, drawArrows, braceWidth
+            data,
+            selectedData: CDF,
+            w, h,
+            W, H,
+            padX, padY,
+            cellW, cellH,
+            highlightCol, highlightRow,
+            drawArrows, braceWidth, fontSize,
+            yLabelWidth, xLabelHeight,
+            selectOnMouseOver
           }} />
         </Translate>
       </svg>
@@ -203,9 +235,17 @@ let Grids = React.createClass({
   },
 
   render() {
-    let { w, h, H, padX, padY, cellW, cellH, data, drawArrows, braceWidth } = this.props;
-    const { selectedR, selectedC } = this.state;
-    let gridHeight = h*cellH, gridWidth = w*cellW;
+    let { w, h, W, H, padX, padY, cellW, cellH, data, selectedData, drawArrows, braceWidth, fontSize, yLabelWidth, xLabelHeight, selectOnMouseOver } = this.props;
+    const { selectedR, selectedC, selectedCell } = this.state;
+
+    if (selectedCell && selectedData) {
+      let { R, C, r, c } = selectedCell;
+      data = JSON.parse(JSON.stringify(data));
+      data[R][C][r][c] = selectedData[R][C][r][c];
+    }
+
+    let gridHeight = h * cellH, gridWidth = w * cellW;
+    let paddedGridHeight = gridHeight + padY, paddedGridWidth = gridWidth + padX;
     const grids =
           data.map((gridRow, R) =>
                 gridRow.map((grid, C) => {
@@ -356,11 +396,12 @@ let Grids = React.createClass({
                     }
                   }
 
-                  return <Translate className={className} x={C * (gridWidth + padX)} y={R * (gridHeight + padY)}>
+                  return <Translate className={className} x={C * paddedGridWidth} y={R * paddedGridHeight}>
                       <Grid
-                            {...{grid, R, C}}
+                            {...{grid, R, C, selectedCell: selectOnMouseOver && selectedCell}}
                             {...this.props}
                             onMouseDown={(e, ui) => this.onMouseDown(e, ui, R, C)}
+                            selectCellFn={selectOnMouseOver ? this.cellSelected : null}
                       />
                       {arrows}
                     </Translate>
@@ -368,7 +409,66 @@ let Grids = React.createClass({
                 })
           );
 
-    return <g onClick={this.clearSelection}>{grids}</g>
+    const yLabels = [];
+    for (let R = 0; R < H; R++) {
+      for (let r = 0; r < h; r++) {
+        let label = H * h - (R * h + r);
+        yLabels.push(
+              <text
+                    key={R + "-" + r}
+                    x={cellW / 2}
+                    y={paddedGridHeight * R + cellH * (r + 0.5)}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize={fontSize}
+              >
+                {label}
+              </text>);
+      }
+    }
+
+    const xLabels = [];
+    for (let C = 0; C < W; C++) {
+      for (let c = 0; c < w; c++) {
+        let label = C*w + c + 1;
+        xLabels.push(
+              <text
+                    key={C + "-" + c}
+                    x={paddedGridWidth * C + cellW * (c + 0.5)}
+                    y={-cellH / 2}
+                    textAnchor="middle"
+                    dominantBaseline="middle"
+                    fontSize={fontSize}
+              >
+                {label}
+              </text>
+        );
+      }
+    }
+
+    return <g onClick={this.clearSelection}>
+      <g className="y-labels">{yLabels}</g>
+      <Translate x={yLabelWidth}>
+        <g className="grids" onMouseLeave={this.onMouseLeave}>
+          {grids}
+        </g>
+        <Translate y={paddedGridHeight * H - padY + xLabelHeight}>
+          <g className="x-labels">{xLabels}</g>
+        </Translate>
+      </Translate>
+    </g>;
+  },
+
+  onMouseLeave() {
+    this.setState({
+      selectedCell: null
+    });
+  },
+
+  cellSelected(R, C, r, c) {
+    this.setState({
+      selectedCell: { R, C, r, c }
+    });
   },
 
   clearSelection() {
@@ -382,7 +482,18 @@ let Grids = React.createClass({
 
 let Grid = React.createClass({
   render() {
-    let { grid, R, C, w, h, W, cellW, cellH, highlightCol, highlightRow, drawArrows, braceWidth, onMouseDown } = this.props;
+    let {
+          grid,
+          R, C,
+          w, h,
+          W,
+          cellW, cellH,
+          highlightCol, highlightRow,
+          selectedCell,
+          selectCellFn,
+          drawArrows, braceWidth, fontSize, onMouseDown
+    } =
+          this.props;
     let curves = [];
     if (drawArrows) {
       if (C > 0) {
@@ -409,14 +520,42 @@ let Grid = React.createClass({
         );
       }
     }
+    let selectRect = null;
+    if (selectedCell) {
+      const { R: sR, C: sC, r: sr, c: sc } = selectedCell;
+
+      if (R <= sR && C >= sC) {
+        selectRect = { r: h - 1, c: 0 };
+        if (R === sR) {
+          selectRect.r = sr;
+        }
+
+        if (C === sC) {
+          selectRect.c = sc;
+        }
+      }
+    }
+
+    const renderFn = (r, c, ch) => ch === 0 ? '-' : null;
+    const attrsFn =
+          (r, c, ch) =>
+                (selectedCell &&
+                selectedCell.R === R &&
+                selectedCell.C === C &&
+                selectedCell.r === r &&
+                selectedCell.c === c) ?
+                      { fontWeight: "bold" } :
+                      {};
+
     return <g>
       <SvgCells
             key={R + "," + C}
             rows={grid}
             w={cellW}
             h={cellH}
-            fontSize={14}
-            {...{highlightCol, highlightRow, onMouseDown}}
+            fontSize={fontSize}
+            cellMouseEnterFn={selectCellFn ? (r, c) => (e) => selectCellFn(R, C, r, c) : null}
+            {...{highlightCol, highlightRow, onMouseDown, selectRect, renderFn, attrsFn}}
       />
       {curves}
     </g>;
