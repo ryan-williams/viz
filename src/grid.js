@@ -146,7 +146,7 @@ const PrefixSum = React.createClass({
 
   render() {
     const {
-          data, partitionCDF, CDF,
+          data, partitionCDF,
           w, h,
           W, H,
           cellW, cellH,
@@ -163,7 +163,7 @@ const PrefixSum = React.createClass({
         <input type="button" onClick={this.next} value="Next" disabled={stepIdx + 1 === steps.length}/>
         <div className="label" onClick={this.next}>{label}</div>
       </div>
-      <svg height={H * (h * cellH + padY) + xLabelHeight} width={W * (w * cellW + padX) + yLabelWidth}>
+      <svg className="svg" height={H * (h * cellH + padY) + xLabelHeight} width={W * (w * cellW + padX) + yLabelWidth}>
         <defs>
           <marker id="Triangle"
                   viewBox="0 0 10 10"

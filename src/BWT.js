@@ -119,7 +119,7 @@ let BWT = React.createClass({
 
       sortedTables =
             <div className="svg-container">
-              <svg className="svg" width={svgWidth} height={svgHeight}>
+              <svg width={svgWidth} height={svgHeight}>
                 <g transform={"translate("+svgBorder+","+svgBorder+")"}>
                   <SortTables {...{rowStrs, sortedStrs, w, h, fontSize, invSortDict, cellsWidth, sortArrowsWidth}} />
                   <CardinalCurve

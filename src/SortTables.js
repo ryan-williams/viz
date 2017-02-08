@@ -73,7 +73,7 @@ let SvgCells = React.createClass({
     }
 
     const m = rows ? rows.length : 0
-    const n = rows ? rows[0].length : 0;
+    const n = rows && rows[0] ? rows[0].length : 0;
 
     if (!w || !h || !fontSize) {
       w = this.state.cellDimFn(n);
@@ -88,14 +88,16 @@ let SvgCells = React.createClass({
 
         const label = renderFn && renderFn(r, c, ch) || ch;
 
-        const attrs = attrsFn && attrsFn(r, c, ch) || {};
+        const allAttrs = attrsFn && attrsFn(r, c, ch) || {};
+
+        const { backgroundClass, attrs } = allAttrs;
 
         const backgroundRect =
-              attrs.backgroundClass ?
+              backgroundClass ?
                     <rect
                           x={0} y={0}
                           width={w} height={h}
-                          className={attrs.backgroundClass}
+                          className={backgroundClass}
                     /> :
                     null;
 
