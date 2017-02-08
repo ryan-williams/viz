@@ -153,13 +153,15 @@ const PrefixSum = React.createClass({
     } =
           this.state;
 
+    const svgWidth = W * (w * cellW + padX) + yLabelWidth, svgHeight = H * (h * cellH + padY) + xLabelHeight;
+    const githubImgSize = 32;
     return <div onKeyDown={this.onKeyPress}>
       <div className="controls" style={{ position: "relative", top: (padY / 2) + "px" }}>
         <input type="button" onClick={this.prev} value="Prev" disabled={stepIdx === -1}/>
         <input type="button" onClick={this.next} value="Next" disabled={stepIdx + 1 === steps.length}/>
         <div className="label" onClick={this.next}>{label}</div>
       </div>
-      <svg className="svg" height={H * (h * cellH + padY) + xLabelHeight} width={W * (w * cellW + padX) + yLabelWidth}>
+      <svg className="svg" height={svgHeight} width={svgWidth}>
         <defs>
           <marker id="Triangle"
                   viewBox="0 0 10 10"
@@ -188,6 +190,11 @@ const PrefixSum = React.createClass({
           }} />
         </Translate>
       </svg>
+      <div style={{clear: "both"}}>
+        <a className="github" href="https://github.com/ryan-williams/viz">
+          <img width={githubImgSize} height={githubImgSize} src="/github.png" alt="GitHub icon" />
+        </a>
+      </div>
     </div>;
   },
 

@@ -155,7 +155,7 @@ let BWT = React.createClass({
                       value={rawValue}
                 />
               </div>
-              <a className="github" href="https://github.com/ryan-williams/bwt">
+              <a className="github" href="https://github.com/ryan-williams/viz">
                 <img width="32" height="32" src="/github.png" alt="GitHub icon" />
               </a>
             </div>
