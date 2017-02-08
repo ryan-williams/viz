@@ -134,10 +134,6 @@ const PrefixSum = React.createClass({
           highlightCol: -1,
           highlightRow: -1,
           label: "Each partition collects and incorporates partial-sums sent to it by other partitions"
-        },
-        {
-          padX,
-          padY
         }
       ],
       prevSteps: []
