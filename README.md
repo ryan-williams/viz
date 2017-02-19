@@ -20,6 +20,6 @@ The bottom two rows are the BWT, and a naively run-length-encoded (RLE) BWT. For
 To run locally:
 
 ```
-git clone git@github.com:ryan-williams/viz.git && cd bwt
+git clone git@github.com:ryan-williams/viz.git && cd viz
 npm start
 ```
